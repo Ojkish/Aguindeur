@@ -276,6 +276,11 @@
     width: 42px;
     text-align: left;
   }
+  #needle-group {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
 </style>
 </head>
 <body>
@@ -291,13 +296,20 @@
   <!-- METER -->
   <div class="meter-wrap">
     <svg class="meter-svg" viewBox="0 0 340 160" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
+<defs>
+  <filter id="glow"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
+          color-interpolation-filters="sRGB">
+    <feGaussianBlur stdDeviation="3" result="blur"/>
+    <feMerge>
+      <feMergeNode in="blur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+</defs>
       <!-- Arc background -->
       <path d="M 30 150 A 140 140 0 0 1 310 150" fill="none" stroke="#1a1e28" stroke-width="12" stroke-linecap="round"/>
 
@@ -327,11 +339,40 @@
       <text x="320" y="155" fill="#ff4a7e" font-size="11" font-family="Share Tech Mono,monospace" text-anchor="middle">♯</text>
 
       <!-- Needle -->
-      <g id="needle-group" transform="rotate(0 170 150)">
-        <line id="needle" x1="170" y1="150" x2="170" y2="30" stroke="#00e5a0" stroke-width="2.5" stroke-linecap="round" filter="url(#glow)"/>
-        <circle cx="170" cy="150" r="5" fill="#00e5a0" filter="url(#glow)"/>
-        <circle cx="170" cy="150" r="10" fill="none" stroke="#00e5a0" stroke-width="1" opacity="0.3"/>
-      </g>
+<g id="needle-group">
+  <!-- Halo -->
+  <line x1="170"
+        y1="150"
+        x2="170"
+        y2="30"
+        stroke="#00e5a0"
+        stroke-width="8"
+        stroke-linecap="round"
+        opacity="0.18"/>
+
+  <!-- Aiguille -->
+  <line id="needle"
+        x1="170"
+        y1="150"
+        x2="170"
+        y2="30"
+        stroke="#00e5a0"
+        stroke-width="2.5"
+        stroke-linecap="round"/>
+
+  <circle cx="170"
+          cy="150"
+          r="5"
+          fill="#00e5a0"/>
+
+  <circle cx="170"
+          cy="150"
+          r="10"
+          fill="none"
+          stroke="#00e5a0"
+          stroke-width="1"
+          opacity="0.3"/>
+</g>
     </svg>
   </div>
 
@@ -852,15 +893,21 @@ function updateDisplay(note, octave, freq, cents) {
 
 function setNeedle(angle) {
   angle = Math.max(-90, Math.min(90, angle));
+
   const group = document.getElementById('needle-group');
-  group.setAttribute('transform', `rotate(${angle} 170 150)`);
+
+  group.style.transformBox = 'fill-box';
+  group.style.transformOrigin = '50% 100%';
+  group.style.transform = `rotate(${angle}deg)`;
+
   const needle = document.getElementById('needle');
+
   if (Math.abs(angle) < 5) {
     needle.setAttribute('stroke', '#00e5a0');
-    group.setAttribute('class', 'needle-in-tune');
+    group.classList.add('needle-in-tune');
   } else {
     needle.setAttribute('stroke', '#00e5a0');
-    group.removeAttribute('class');
+    group.classList.remove('needle-in-tune');
   }
 }
 
