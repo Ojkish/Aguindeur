@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Patchapapa Tuner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --accent: #00e5a0;
+    --accent2: #00b37a;
+    --warn: #ff6b35;
+    --text: #e8eaf0;
+    --muted: #5a6070;
+    --flat: #4a8fff;
+    --sharp: #ff4a7e;
+    --needle: #00e5a0;
+    --in-tune: #00e5a0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 2rem;
+    overflow-x: hidden;
+  }
+
+  header {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .logo-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); }
+  header span { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; margin-left: auto; font-family: 'Share Tech Mono', monospace; }
+
+  .main { width: 100%; max-width: 420px; padding: 0 1rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin-top: 1.5rem; }
+
+  /* --- METER --- */
+  .meter-wrap { width: 100%; position: relative; }
+
+  .meter-svg { width: 100%; display: block; }
+
+  .note-display {
+    text-align: center;
+    margin-top: -0.5rem;
+  }
+
+  .note-big {
+    font-size: 5rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    transition: color 0.2s;
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text);
+  }
+
+  .note-big.in-tune { color: var(--in-tune); text-shadow: 0 0 20px rgba(0,229,160,0.4); }
+  .note-big.flat { color: var(--flat); }
+  .note-big.sharp { color: var(--sharp); }
+
+  .note-octave {
+    font-size: 1.5rem;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    vertical-align: super;
+  }
+
+  .freq-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .cents-display {
+    font-size: 1.1rem;
+    font-family: 'Share Tech Mono', monospace;
+    height: 1.5rem;
+    color: var(--muted);
+    margin-top: 2px;
+    transition: color 0.2s;
+  }
+  .cents-display.in-tune { color: var(--in-tune); }
+  .cents-display.off { color: var(--warn); }
+
+  /* --- STRINGS --- */
+  .strings-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); align-self: flex-start; margin-bottom: -0.75rem; }
+
+  .strings-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .string-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 0.3rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .string-btn:hover { border-color: var(--accent2); background: #1e2230; }
+  .string-btn.active { border-color: var(--accent); background: rgba(0,229,160,0.08); }
+
+  .string-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+
+  .string-freq {
+    font-size: 0.6rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--muted);
+  }
+
+  /* --- CONTROLS --- */
+  .controls { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+
+  .btn-row { display: flex; gap: 10px; width: 100%; }
+
+  .btn {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:hover { border-color: rgba(255,255,255,0.15); background: #1e2230; }
+  .btn.primary { border-color: var(--accent); color: var(--accent); }
+  .btn.primary:hover { background: rgba(0,229,160,0.1); }
+  .btn.primary.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .btn.danger { border-color: var(--warn); color: var(--warn); }
+  .btn.danger:hover { background: rgba(255,107,53,0.1); }
+
+  /* --- SOUND MODE --- */
+  .sound-mode {
+    display: flex;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .mode-btn {
+    flex: 1;
+    padding: 0.65rem;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mode-btn.active { background: rgba(0,229,160,0.12); color: var(--accent); }
+
+  /* --- STATUS --- */
+  .status-bar {
+    font-size: 0.7rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    margin-right: 6px;
+    vertical-align: middle;
+    transition: background 0.3s;
+  }
+
+  .status-dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 1.5s infinite; }
+  .status-dot.playing { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* --- DIVIDER --- */
+  .divider { width: 100%; height: 1px; background: var(--border); }
+
+  /* needle glow animation */
+  @keyframes glow-green { 0%,100%{filter:drop-shadow(0 0 4px #00e5a0)} 50%{filter:drop-shadow(0 0 12px #00e5a0)} }
+  .needle-in-tune { animation: glow-green 1s infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>Tuner</h1>
+  <span id="header-status">STANDBY</span>
+</header>
+
+<div class="main">
+
+  <!-- METER -->
+  <div class="meter-wrap">
+    <svg class="meter-svg" viewBox="0 0 340 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Arc background -->
+      <path d="M 30 150 A 140 140 0 0 1 310 150" fill="none" stroke="#1a1e28" stroke-width="12" stroke-linecap="round"/>
+
+      <!-- Colored zones -->
+      <path id="arc-flat"  d="M 30 150 A 140 140 0 0 1 100 38" fill="none" stroke="#4a8fff" stroke-width="6" stroke-linecap="round" opacity="0.35"/>
+      <path id="arc-in"    d="M 145 17 A 140 140 0 0 1 195 17" fill="none" stroke="#00e5a0" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+      <path id="arc-sharp" d="M 240 38 A 140 140 0 0 1 310 150" fill="none" stroke="#ff4a7e" stroke-width="6" stroke-linecap="round" opacity="0.35"/>
+
+      <!-- Tick marks -->
+      <g stroke="#2a2f3e" stroke-width="1.5" stroke-linecap="round">
+        <line x1="30" y1="150" x2="38" y2="150" transform="rotate(-90 170 150)"/>
+        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(-72 170 150)"/>
+        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(-54 170 150)"/>
+        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(-36 170 150)"/>
+        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(-18 170 150)"/>
+        <line x1="30" y1="150" x2="38" y2="150"/>
+        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(18 170 150)"/>
+        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(36 170 150)"/>
+        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(54 170 150)"/>
+        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(72 170 150)"/>
+        <line x1="30" y1="150" x2="38" y2="150" transform="rotate(90 170 150)"/>
+      </g>
+
+      <!-- Labels -->
+      <text x="20" y="155" fill="#4a8fff" font-size="11" font-family="Share Tech Mono,monospace" text-anchor="middle">♭</text>
+      <text x="170" y="12" fill="#00e5a0" font-size="10" font-family="Share Tech Mono,monospace" text-anchor="middle">✓</text>
+      <text x="320" y="155" fill="#ff4a7e" font-size="11" font-family="Share Tech Mono,monospace" text-anchor="middle">♯</text>
+
+      <!-- Needle -->
+      <g id="needle-group" transform="rotate(0 170 150)">
+        <line id="needle" x1="170" y1="150" x2="170" y2="30" stroke="#00e5a0" stroke-width="2.5" stroke-linecap="round" filter="url(#glow)"/>
+        <circle cx="170" cy="150" r="5" fill="#00e5a0" filter="url(#glow)"/>
+        <circle cx="170" cy="150" r="10" fill="none" stroke="#00e5a0" stroke-width="1" opacity="0.3"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- NOTE DISPLAY -->
+  <div class="note-display">
+    <div class="note-big" id="note-display">—</div>
+    <div class="freq-display" id="freq-display">— Hz</div>
+    <div class="cents-display" id="cents-display">— cents</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- GUITAR STRINGS -->
+  <div class="strings-label">Écouter une corde</div>
+  <div class="strings-grid" id="strings-grid">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- SOUND MODE -->
+  <div class="sound-mode">
+    <button class="mode-btn active" id="mode-sine" onclick="setMode('sine')">Sinus</button>
+    <button class="mode-btn" id="mode-nylon" onclick="setMode('nylon')">Nylon</button>
+    <button class="mode-btn" id="mode-piano" onclick="setMode('piano')">Piano</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- MIC CONTROL -->
+  <div class="controls">
+    <div class="btn-row">
+      <button class="btn primary" id="mic-btn" onclick="toggleMic()">🎙 Activer le micro</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span class="status-dot" id="status-dot"></span>
+    <span id="status-text">Appuyez sur "Activer le micro" pour commencer</span>
+  </div>
+
+</div>
+
+<script>
+const STRINGS = [
+  { name: 'E2', display: 'E', freq: 82.41, oct: '2' },
+  { name: 'A2', display: 'A', freq: 110.00, oct: '2' },
+  { name: 'D3', display: 'D', freq: 146.83, oct: '3' },
+  { name: 'G3', display: 'G', freq: 196.00, oct: '3' },
+  { name: 'B3', display: 'B', freq: 246.94, oct: '3' },
+  { name: 'E4', display: 'E', freq: 329.63, oct: '4' },
+];
+
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+let audioCtx = null;
+let analyser = null;
+let micStream = null;
+let rafId = null;
+let micActive = false;
+let soundMode = 'sine';
+let playingNode = null;
+let activeStringIdx = null;
+let needleAngle = 0;
+let targetAngle = 0;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function buildStrings() {
+  const grid = document.getElementById('strings-grid');
+  STRINGS.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'string-btn';
+    btn.id = 'str-' + i;
+    btn.innerHTML = `<span class="string-name">${s.display}</span><span class="string-freq">${s.freq.toFixed(0)} Hz</span>`;
+    btn.onclick = () => playString(i);
+    grid.appendChild(btn);
+  });
+}
+
+function setMode(mode) {
+  soundMode = mode;
+  document.getElementById('mode-sine').classList.toggle('active', mode === 'sine');
+  document.getElementById('mode-nylon').classList.toggle('active', mode === 'nylon');
+  document.getElementById('mode-piano').classList.toggle('active', mode === 'piano');
+  if (activeStringIdx !== null && playingNode) {
+    stopPlayback();
+    playString(activeStringIdx);
+  }
+}
+
+const FADE_OUT_MS = 80;
+
+function stopPlayback(callback) {
+  if (activeStringIdx !== null) {
+    document.getElementById('str-' + activeStringIdx)?.classList.remove('active');
+    activeStringIdx = null;
+  }
+  if (playingNode) {
+    const node = playingNode;
+    playingNode = null;
+    try { node.stop(); } catch(e){}
+    updateStatusDot();
+    if (callback) setTimeout(callback, FADE_OUT_MS);
+  } else {
+    updateStatusDot();
+    if (callback) callback();
+  }
+}
+
+function playString(idx) {
+  const ctx = getAudioCtx();
+
+  // Sinus : toggle si même corde déjà active
+  if (soundMode === 'sine' && activeStringIdx === idx && playingNode) {
+    stopPlayback();
+    return;
+  }
+
+  const launch = () => {
+    activeStringIdx = idx;
+    document.getElementById('str-' + idx).classList.add('active');
+    const freq = STRINGS[idx].freq;
+    if (soundMode === 'sine') playSine(ctx, freq);
+    else if (soundMode === 'piano') playPiano(ctx, freq);
+    else playNylon(ctx, freq);
+    updateStatusDot();
+  };
+
+  if (playingNode) { stopPlayback(launch); return; }
+  stopPlayback();
+  launch();
+}
+
+function playSine(ctx, freq) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 0.02);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  playingNode = { stop: () => { gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05); setTimeout(()=>osc.stop(),60); } };
+}
+
+function playNylon(ctx, freq) {
+  const duration     = 7.0;
+  const fadeStart    = 3.5;
+  const fadeDuration = 3.5;
+
+  const sampleRate   = ctx.sampleRate;
+  const N            = Math.round(sampleRate / freq);
+  const totalSamples = Math.round(sampleRate * duration);
+  const rawBuf       = ctx.createBuffer(1, totalSamples, sampleRate);
+  const data         = rawBuf.getChannelData(0);
+
+  // Bruit coloré : 4 passes de lissage → attaque douce et ronde
+  const ring = new Float32Array(N);
+  for (let i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
+  for (let pass = 0; pass < 4; pass++)
+    for (let i = 1; i < N; i++) ring[i] = 0.5 * (ring[i] + ring[i - 1]);
+
+  // KS : blend 0.55 (lissage prononcé), decay doux
+  const decay = 0.9987;
+  const b     = 0.55;
+  const fadeStartSample = Math.round(sampleRate * fadeStart);
+
+  for (let i = 0; i < totalSamples; i++) {
+    const cur = i % N;
+    const nxt = (i + 1) % N;
+    // On lit PUIS on met à jour le ring (ordre correct)
+    const raw = ring[cur];
+    ring[cur] = decay * (b * ring[cur] + (1 - b) * ring[nxt]);
+    // Fondu appliqué sur la sortie uniquement
+    if (i < fadeStartSample) {
+      data[i] = raw;
+    } else {
+      const t = (i - fadeStartSample) / (fadeDuration * sampleRate);
+      data[i] = raw * Math.max(0, 1 - t);
+    }
+  }
+
+  const src = ctx.createBufferSource();
+  src.buffer = rawBuf;
+
+  // Filtre corps chaleureux
+  const body = ctx.createBiquadFilter();
+  body.type            = 'peaking';
+  body.frequency.value = 240;
+  body.gain.value      = 7;
+  body.Q.value         = 1.8;
+
+  // Coupe les aigus criards
+  const hicut = ctx.createBiquadFilter();
+  hicut.type            = 'highshelf';
+  hicut.frequency.value = 1800;
+  hicut.gain.value      = -6;
+
+  // Attaque douce via gain envelope
+  const gainNode = ctx.createGain();
+  gainNode.gain.setValueAtTime(0, ctx.currentTime);
+  gainNode.gain.linearRampToValueAtTime(0.72, ctx.currentTime + 0.008);
+
+  src.connect(body);
+  body.connect(hicut);
+  hicut.connect(gainNode);
+  gainNode.connect(ctx.destination);
+  src.start();
+
+  playingNode = {
+    stop: () => {
+      const t = ctx.currentTime;
+      gainNode.gain.setValueAtTime(gainNode.gain.value, t);
+      gainNode.gain.linearRampToValueAtTime(0, t + 0.2);
+      setTimeout(() => { try { src.stop(); } catch(e){} }, 250);
+    }
+  };
+
+  src.onended = () => {
+    if (activeStringIdx !== null) {
+      document.getElementById('str-' + activeStringIdx)?.classList.remove('active');
+      activeStringIdx = null;
+      playingNode = null;
+      updateStatusDot();
+    }
+  };
+}
+
+function playPiano(ctx, freq) {
+  // Synthèse additive : fondamentale + harmoniques avec decays différenciés
+  // Chaque partiel a son propre decay → brillance initiale qui s'estompe (piano réel)
+  const now = ctx.currentTime;
+
+  // Harmoniques : [ratio, gain relatif, decay τ en secondes]
+  const partials = [
+    [1,    1.00,  6.0],   // fondamentale   : longue tenue
+    [2,    0.55,  3.5],   // octave          : decay moyen
+    [3,    0.28,  2.2],   // quinte+octave   : decay plus court
+    [4,    0.18,  1.6],   // 2e octave       : brillance initiale
+    [5,    0.10,  1.1],   // tierce majeure  : attaque brillante
+    [6,    0.07,  0.8],   // harmonique 6    : click d'attaque
+    [7,    0.04,  0.5],   // harmonique 7    : brillance instantanée
+  ];
+
+  // Légère inharmonicité (cordes réelles ne sont pas parfaitement harmoniques)
+  // β = facteur d'inharmonicité (plus élevé pour les graves)
+  const beta = 0.00015 * Math.pow(440 / freq, 1.5);
+
+  const masterGain = ctx.createGain();
+  masterGain.gain.setValueAtTime(0, now);
+  masterGain.gain.linearRampToValueAtTime(0.5, now + 0.002); // attaque piano : très brève
+
+  // Filtre corps piano (chaleur des cortes graves)
+  const body = ctx.createBiquadFilter();
+  body.type            = 'peaking';
+  body.frequency.value = Math.min(freq * 2, 800);
+  body.gain.value      = 4;
+  body.Q.value         = 1.2;
+
+  const oscs = [];
+  const gains = [];
+
+  partials.forEach(([ratio, relGain, tau]) => {
+    // Fréquence inharmonique
+    const f = freq * ratio * Math.sqrt(1 + beta * ratio * ratio);
+
+    const osc  = ctx.createOscillator();
+    const gNode= ctx.createGain();
+
+    osc.type          = 'sine';
+    osc.frequency.value = f;
+
+    // Enveloppe exponentielle individuelle par partiel
+    gNode.gain.setValueAtTime(relGain * 0.85, now + 0.002);
+    gNode.gain.setTargetAtTime(0, now + 0.002, tau);
+
+    osc.connect(gNode);
+    gNode.connect(masterGain);
+    osc.start(now);
+    osc.stop(now + tau * 5); // stop à 5τ (≈ inaudible)
+
+    oscs.push(osc);
+    gains.push(gNode);
+  });
+
+  masterGain.connect(body);
+  body.connect(ctx.destination);
+
+  const totalDur = partials[0][2] * 5; // durée = 5τ de la fondamentale
+
+  playingNode = {
+    stop: () => {
+      const t = ctx.currentTime;
+      masterGain.gain.setValueAtTime(masterGain.gain.value, t);
+      masterGain.gain.linearRampToValueAtTime(0, t + 0.08);
+      oscs.forEach(o => { try { o.stop(t + 0.1); } catch(e){} });
+    }
+  };
+
+  // Nettoyage auto après extinction naturelle
+  setTimeout(() => {
+    if (activeStringIdx !== null && soundMode === 'piano') {
+      document.getElementById('str-' + activeStringIdx)?.classList.remove('active');
+      activeStringIdx = null;
+      playingNode = null;
+      updateStatusDot();
+    }
+  }, totalDur * 1000);
+}
+
+// Courbe de saturation douce (non utilisée mais conservée pour extensions futures)
+function makeSoftClipCurve(amount) {
+  const n = 256;
+  const curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = (i * 2) / n - 1;
+    curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+  }
+  return curve;
+}
+
+async function toggleMic() {
+  if (micActive) {
+    stopMic();
+  } else {
+    await startMic();
+  }
+}
+
+async function startMic() {
+  try {
+    const ctx = getAudioCtx();
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    micStream = stream;
+    const source = ctx.createMediaStreamSource(stream);
+    analyser = ctx.createAnalyser();
+    analyser.fftSize = 4096;
+    analyser.smoothingTimeConstant = 0.8;
+    source.connect(analyser);
+    micActive = true;
+
+    const btn = document.getElementById('mic-btn');
+    btn.textContent = '⏹ Couper le micro';
+    btn.classList.add('on');
+    document.getElementById('header-status').textContent = 'LISTENING';
+    updateStatusDot();
+    detect();
+  } catch(e) {
+    setStatus('Accès micro refusé — vérifiez les permissions', false);
+  }
+}
+
+function stopMic() {
+  if (rafId) cancelAnimationFrame(rafId);
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  analyser = null;
+  micActive = false;
+  const btn = document.getElementById('mic-btn');
+  btn.textContent = '🎙 Activer le micro';
+  btn.classList.remove('on');
+  document.getElementById('header-status').textContent = 'STANDBY';
+  document.getElementById('note-display').textContent = '—';
+  document.getElementById('freq-display').textContent = '— Hz';
+  document.getElementById('cents-display').textContent = '— cents';
+  document.getElementById('note-display').className = 'note-big';
+  document.getElementById('cents-display').className = 'cents-display';
+  setNeedle(0);
+  setStatus("Micro désactivé", false);
+}
+
+function detect() {
+  if (!analyser) return;
+  const buf = new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(buf);
+  const freq = autocorrelate(buf, audioCtx.sampleRate);
+
+  if (freq > 0) {
+    const { note, octave, cents } = freqToNote(freq);
+    updateDisplay(note, octave, freq, cents);
+  }
+
+  rafId = requestAnimationFrame(detect);
+}
+
+function autocorrelate(buf, sampleRate) {
+  let rms = 0;
+  for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / buf.length);
+  if (rms < 0.01) return -1;
+
+  let r1 = 0, r2 = buf.length - 1;
+  const threshold = 0.2;
+  for (let i = 0; i < buf.length / 2; i++) { if (Math.abs(buf[i]) < threshold) { r1 = i; break; } }
+  for (let i = 1; i < buf.length / 2; i++) { if (Math.abs(buf[buf.length - i]) < threshold) { r2 = buf.length - i; break; } }
+
+  const trimmed = buf.slice(r1, r2);
+  const n = trimmed.length;
+  const c = new Float32Array(n);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n - i; j++) c[i] += trimmed[j] * trimmed[j + i];
+
+  let d = 1;
+  while (c[d] > c[d - 1]) d++;
+  let maxval = -1, maxpos = -1;
+  for (let i = d; i < n; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
+
+  let T0 = maxpos;
+  const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+  const a = (x1 + x3 - 2 * x2) / 2, b = (x3 - x1) / 2;
+  if (a) T0 = T0 - b / (2 * a);
+
+  return sampleRate / T0;
+}
+
+function freqToNote(freq) {
+  const A4 = 440;
+  const semitones = 12 * Math.log2(freq / A4);
+  const rounded = Math.round(semitones);
+  const noteIdx = ((rounded % 12) + 12 + 9) % 12;
+  const octave = Math.floor((rounded + 69) / 12);
+  const cents = Math.round((semitones - rounded) * 100);
+  return { note: NOTES[noteIdx], octave, cents };
+}
+
+function updateDisplay(note, octave, freq, cents) {
+  const noteEl = document.getElementById('note-display');
+  const freqEl = document.getElementById('freq-display');
+  const centsEl = document.getElementById('cents-display');
+
+  noteEl.innerHTML = note + `<span class="note-octave">${octave}</span>`;
+  freqEl.textContent = freq.toFixed(1) + ' Hz';
+
+  const absCents = Math.abs(cents);
+  centsEl.textContent = (cents > 0 ? '+' : '') + cents + ' cents';
+
+  if (absCents <= 5) {
+    noteEl.className = 'note-big in-tune';
+    centsEl.className = 'cents-display in-tune';
+  } else if (cents < 0) {
+    noteEl.className = 'note-big flat';
+    centsEl.className = 'cents-display off';
+  } else {
+    noteEl.className = 'note-big sharp';
+    centsEl.className = 'cents-display off';
+  }
+
+  const angle = cents * 0.9;
+  setNeedle(angle);
+}
+
+function setNeedle(angle) {
+  angle = Math.max(-90, Math.min(90, angle));
+  const group = document.getElementById('needle-group');
+  group.setAttribute('transform', `rotate(${angle} 170 150)`);
+  const needle = document.getElementById('needle');
+  if (Math.abs(angle) < 5) {
+    needle.setAttribute('stroke', '#00e5a0');
+    group.setAttribute('class', 'needle-in-tune');
+  } else {
+    needle.setAttribute('stroke', '#00e5a0');
+    group.removeAttribute('class');
+  }
+}
+
+function updateStatusDot() {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  if (playingNode || activeStringIdx !== null) {
+    dot.className = 'status-dot playing';
+    txt.textContent = 'Lecture : ' + (activeStringIdx !== null ? STRINGS[activeStringIdx].name : '');
+  } else if (micActive) {
+    dot.className = 'status-dot active';
+    txt.textContent = 'Micro actif — jouez une note';
+  } else {
+    dot.className = 'status-dot';
+    txt.textContent = 'Appuyez sur "Activer le micro" pour commencer';
+  }
+}
+
+function setStatus(msg, active) {
+  document.getElementById('status-text').textContent = msg;
+  document.getElementById('status-dot').className = 'status-dot' + (active ? ' active' : '');
+}
+
+buildStrings();
+</script>
+</body>
+</html>
