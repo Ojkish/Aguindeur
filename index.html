@@ -384,7 +384,7 @@ function setMode(mode) {
   }
 }
 
-const FADE_OUT_MS = 80;
+const FADE_OUT_MS = 160;
 
 function stopPlayback(callback) {
   if (activeStringIdx !== null) {
@@ -437,7 +437,7 @@ function playSine(ctx, freq) {
   osc.connect(gain);
   gain.connect(ctx.destination);
   osc.start();
-  playingNode = { stop: () => { gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05); setTimeout(()=>osc.stop(),60); } };
+  playingNode = { stop: () => { const t = ctx.currentTime; gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(0, t + 0.15); setTimeout(()=>{ try{osc.stop();}catch(e){} }, 180); } };
 }
 
 function playNylon(ctx, freq) {
