@@ -626,14 +626,31 @@ async function toggleMic() {
 
 async function startMic() {
   try {
+    // getUserMedia d'abord — le geste utilisateur est encore "frais"
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
+
+    // AudioContext créé/résumé APRÈS l'obtention du stream (iOS-safe)
     const ctx = getAudioCtx();
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    await ctx.resume();
+
     micStream = stream;
     const source = ctx.createMediaStreamSource(stream);
+
     analyser = ctx.createAnalyser();
     analyser.fftSize = 4096;
-    analyser.smoothingTimeConstant = 0.8;
+    analyser.smoothingTimeConstant = 0.5;
+
+    // Nœud silencieux connecté à destination — requis par Firefox
+    // pour activer le graphe audio et alimenter getFloatTimeDomainData
+    const silent = ctx.createGain();
+    silent.gain.value = 0;
+
     source.connect(analyser);
+    source.connect(silent);
+    silent.connect(ctx.destination);
+
     micActive = true;
 
     const btn = document.getElementById('mic-btn');
