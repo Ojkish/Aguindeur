@@ -596,11 +596,12 @@ const STRINGS = [
 ];
 const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
-let audioCtx=null, analyser=null, micStream=null, rafId=null;
+let audioCtx=null, analyser=null, micStream=null, rafId=null, detectRafId=null;
 let micActive=false, soundMode='sine', playingNode=null, activeStringIdx=null;
 let targetNeedleAngle = 0;
 let currentNeedleAngle = 0;
-let stableFreq = null;
+let smoothFreq = null;
+let noSignalFrames = 0;
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
