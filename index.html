@@ -173,12 +173,6 @@
   .note-big.flat    { color: #1040a0; }
   .note-big.sharp   { color: #a01010; }
 
-  .note-octave {
-    font-size: 1.2rem;
-    color: #6a5840;
-    font-family: 'Share Tech Mono', monospace;
-    vertical-align: super;
-  }
 
   .freq-cents-row {
     display: flex;
@@ -408,7 +402,6 @@
     transform-box: fill-box;
     transform-origin: 50% 100%;
     will-change: transform;
-    transition: transform 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   @keyframes glow-green {
@@ -498,13 +491,54 @@
         <text x="292" y="128" fill="#3a3020" font-size="6.5" font-family="Share Tech Mono,monospace" text-anchor="middle">330</text>
 
         <!-- Aiguille -->
-        <g id="needle-group">
-          <line x1="160" y1="138" x2="160" y2="22"
-                stroke="#1a1008" stroke-width="1.8" stroke-linecap="round"/>
-          <circle cx="160" cy="138" r="5" fill="#2a1808"/>
-          <circle cx="160" cy="138" r="8" fill="none" stroke="#2a1808" stroke-width="1" opacity="0.4"/>
-        </g>
-      </svg>
+<g id="needle-group">
+
+  <!-- Corps de l'aiguille -->
+  <polygon
+      points="158,138 162,138 160,26"
+      fill="#1a1a1a"/>
+
+  <!-- Reflet métallique -->
+  <line
+      x1="160"
+      y1="138"
+      x2="160"
+      y2="30"
+      stroke="#ffffff"
+      stroke-width="0.5"
+      opacity="0.55"/>
+
+  <!-- Contrepoids -->
+  <circle
+      cx="160"
+      cy="148"
+      r="4"
+      fill="#1a1a1a"/>
+
+  <!-- Axe principal -->
+  <circle
+      cx="160"
+      cy="138"
+      r="10"
+      fill="#252525"/>
+
+  <!-- Bague métallique -->
+  <circle
+      cx="160"
+      cy="138"
+      r="7"
+      fill="#5e5e5e"/>
+
+  <!-- Vis centrale -->
+  <circle
+      cx="160"
+      cy="138"
+      r="2.5"
+      fill="#d8d8d8"/>
+
+</g>
+
+</svg>
 
       <!-- Note & cents sur la face -->
       <div class="note-display">
@@ -564,6 +598,9 @@ const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
 let audioCtx=null, analyser=null, micStream=null, rafId=null;
 let micActive=false, soundMode='sine', playingNode=null, activeStringIdx=null;
+let targetNeedleAngle = 0;
+let currentNeedleAngle = 0;
+let stableFreq = null;
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -843,8 +880,28 @@ function detect() {
   rms=Math.sqrt(rms/buf.length);
   updateDbMeter(rms);
   const freq=autocorrelate(buf,audioCtx.sampleRate);
-  if(freq>0){ const {note,octave,cents}=freqToNote(freq); updateDisplay(note,octave,freq,cents); }
-  rafId=requestAnimationFrame(detect);
+if(freq>0){
+
+  if(stableFreq===null){
+    stableFreq=freq;
+  }
+
+  stableFreq =
+    stableFreq * 0.85 +
+    freq * 0.15;
+
+  const {note,octave,cents} =
+    freqToNote(stableFreq);
+
+  updateDisplay(
+    note,
+    octave,
+    stableFreq,
+    cents
+  );
+}
+
+rafId=requestAnimationFrame(detect);
 }
 
 function updateDbMeter(rms) {
@@ -895,7 +952,7 @@ function updateDisplay(note,octave,freq,cents) {
   const noteEl=document.getElementById('note-display');
   const freqEl=document.getElementById('freq-display');
   const centsEl=document.getElementById('cents-display');
-  noteEl.innerHTML=note+`<span class="note-octave">${octave}</span>`;
+  noteEl.textContent = note;
   freqEl.textContent=freq.toFixed(1)+' Hz';
   centsEl.textContent=(cents>0?'+':'')+cents+' ¢';
   const abs=Math.abs(cents);
@@ -909,15 +966,31 @@ function updateDisplay(note,octave,freq,cents) {
     noteEl.className='note-big sharp';
     centsEl.className='cents-val off';
   }
-  setNeedle(cents*0.9);
+targetNeedleAngle = cents * 0.9;
 }
 
-function setNeedle(angle) {
-  angle=Math.max(-90,Math.min(90,angle));
-  const g=document.getElementById('needle-group');
-  g.style.transform=`rotate(${angle}deg)`;
-  if(Math.abs(angle)<5) g.classList.add('needle-in-tune');
-  else g.classList.remove('needle-in-tune');
+function animateNeedle() {
+
+  const g = document.getElementById('needle-group');
+
+  targetNeedleAngle =
+    Math.max(-90, Math.min(90, targetNeedleAngle));
+
+  const delta =
+    targetNeedleAngle - currentNeedleAngle;
+
+currentNeedleAngle += delta * 0.06;
+
+  g.style.transform =
+    `rotate(${currentNeedleAngle}deg)`;
+
+  if (Math.abs(currentNeedleAngle) < 5) {
+    g.classList.add('needle-in-tune');
+  } else {
+    g.classList.remove('needle-in-tune');
+  }
+
+  requestAnimationFrame(animateNeedle);
 }
 
 function updateStatusDot() {
@@ -941,6 +1014,7 @@ function setStatus(msg,active) {
 }
 
 buildStrings();
+animateNeedle();
 </script>
 </body>
 </html>
