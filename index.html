@@ -835,7 +835,7 @@ async function startMic() {
     micStream = stream;
     const source = ctx.createMediaStreamSource(stream);
     analyser = ctx.createAnalyser();
-    analyser.fftSize = 4096;
+    analyser.fftSize = 8192;
     analyser.smoothingTimeConstant = 0.5;
     const micBoost=ctx.createGain(); micBoost.gain.value=8;
     const silent=ctx.createGain();   silent.gain.value=0;
@@ -881,8 +881,8 @@ function detect() {
   for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
   rms=Math.sqrt(rms/buf.length);
   updateDbMeter(rms);
-  const freq=detectPitch(buf,audioCtx.sampleRate);
-  if(freq>0){
+if(playingNode){ detectRafId=requestAnimationFrame(detect); return; }
+  const freq=detectPitch(buf,audioCtx.sampleRate);  if(freq>0){
     noSignalFrames=0;
     if(smoothFreq===null){ smoothFreq=freq; }
     else {
@@ -917,15 +917,17 @@ function detectPitch(buf, sampleRate) {
   for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
   if(Math.sqrt(rms/buf.length)<0.0008) return -1;
 
-  const minPeriod=Math.floor(sampleRate/420);
-  const maxPeriod=Math.ceil(sampleRate/70);
-  const W=Math.min(2048,Math.floor(buf.length/2));
+const windowed=new Float32Array(buf.length);
+  for(let i=0;i<buf.length;i++)
+    windowed[i]=buf[i]*0.5*(1-Math.cos(2*Math.PI*i/buf.length));
+
+  const minPeriod=Math.floor(sampleRate/420);  const maxPeriod=Math.ceil(sampleRate/70);
+const W=Math.min(2048,Math.floor(buf.length/2));
 
   const d=new Float32Array(maxPeriod+2);
   for(let tau=1;tau<=maxPeriod;tau++){
     let sum=0;
-    for(let j=0;j<W;j++){ const delta=buf[j]-buf[j+tau]; sum+=delta*delta; }
-    d[tau]=sum;
+    for(let j=0;j<W;j++){ const delta=windowed[j]-windowed[j+tau]; sum+=delta*delta; }    d[tau]=sum;
   }
 
   const nd=new Float32Array(maxPeriod+2);
