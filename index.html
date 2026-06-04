@@ -6,408 +6,537 @@
 <title>Patchapapa Tuner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0d0f14;
-    --bg2: #13161e;
-    --bg3: #1a1e28;
-    --border: rgba(255,255,255,0.07);
-    --accent: #00e5a0;
-    --accent2: #00b37a;
-    --warn: #ff6b35;
-    --text: #e8eaf0;
-    --muted: #5a6070;
-    --flat: #4a8fff;
-    --sharp: #ff4a7e;
-    --needle: #00e5a0;
-    --in-tune: #00e5a0;
+    --bg:        #1a2e1a;
+    --bg2:       #142214;
+    --bg3:       #0e180e;
+    --panel:     #1f3620;
+    --plastic:   #2a4a2a;
+    --border:    rgba(80,160,80,0.18);
+    --accent:    #7ecf5a;
+    --accent2:   #5aab36;
+    --warn:      #f0c040;
+    --text:      #e8f0e0;
+    --muted:     #6a8a6a;
+    --flat:      #4ab0ff;
+    --sharp:     #ff6060;
+    --in-tune:   #7ecf5a;
+    --red-btn:   #cc2020;
+    --red-btn2:  #ff3030;
+    --chrome:    #c8d8c0;
+    --meter-bg:  #0a1a0a;
+    --meter-face:#e8e0c8;
   }
 
   body {
-    background: var(--bg);
+    background: var(--bg3);
     color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Oswald', sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 0 0 2rem;
     overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(60,120,40,0.18) 0%, transparent 70%);
   }
 
+  /* ── HEADER ── */
   header {
     width: 100%;
-    padding: 1.2rem 1.5rem;
+    padding: 0.9rem 1.4rem;
     display: flex;
     align-items: center;
     gap: 12px;
-    border-bottom: 1px solid var(--border);
     background: var(--bg2);
+    border-bottom: 2px solid rgba(60,120,40,0.4);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    position: relative;
   }
 
-  .logo-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
+  .logo-badge {
+    background: var(--red-btn);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #fff;
+    text-transform: uppercase;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
   }
 
-  header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); }
-  header span { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; margin-left: auto; font-family: 'Share Tech Mono', monospace; }
+  header h1 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--chrome);
+  }
 
-  .main { width: 100%; max-width: 420px; padding: 0 1rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin-top: 1.5rem; }
+  .header-model {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-left: auto;
+  }
 
-  /* --- METER --- */
-  .meter-wrap { width: 100%; position: relative; }
+  /* ── MAIN ── */
+  .main {
+    width: 100%;
+    max-width: 400px;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    margin-top: 1.2rem;
+  }
+
+  /* ── METER HOUSING ── */
+  .meter-housing {
+    width: 100%;
+    background: var(--plastic);
+    border-radius: 16px 16px 10px 10px;
+    padding: 12px 12px 8px;
+    box-shadow:
+      0 4px 20px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(120,200,80,0.15),
+      inset 0 -1px 0 rgba(0,0,0,0.4);
+    border: 1px solid rgba(80,160,60,0.25);
+    position: relative;
+  }
+
+  /* Rivets décoratifs */
+  .meter-housing::before,
+  .meter-housing::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #9ab890, #3a5a3a);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+  }
+  .meter-housing::before { left: 10px; }
+  .meter-housing::after  { right: 10px; }
+
+  /* Face du cadran */
+  .meter-face {
+    background: var(--meter-face);
+    border-radius: 10px 10px 6px 6px;
+    padding: 8px 8px 4px;
+    box-shadow:
+      inset 0 2px 8px rgba(0,0,0,0.25),
+      0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
+  }
+
+  .meter-brand {
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #3a3020;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    font-family: 'Oswald', sans-serif;
+  }
 
   .meter-svg { width: 100%; display: block; }
 
+  /* ── NOTE DISPLAY (inside face) ── */
   .note-display {
     text-align: center;
-    margin-top: -0.5rem;
+    padding: 2px 0 4px;
+    background: var(--meter-face);
+    border-radius: 0 0 6px 6px;
   }
 
   .note-big {
-    font-size: 5rem;
+    font-size: 3.8rem;
     font-weight: 700;
     line-height: 1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     transition: color 0.2s;
-    font-family: 'Rajdhani', sans-serif;
-    color: var(--text);
+    font-family: 'Oswald', sans-serif;
+    color: #2a2010;
   }
 
-  .note-big.in-tune { color: var(--in-tune); text-shadow: 0 0 20px rgba(0,229,160,0.4); }
-  .note-big.flat { color: var(--flat); }
-  .note-big.sharp { color: var(--sharp); }
+  .note-big.in-tune { color: #1a6010; }
+  .note-big.flat    { color: #1040a0; }
+  .note-big.sharp   { color: #a01010; }
 
   .note-octave {
-    font-size: 1.5rem;
-    color: var(--muted);
+    font-size: 1.2rem;
+    color: #6a5840;
     font-family: 'Share Tech Mono', monospace;
     vertical-align: super;
   }
 
-  .freq-display {
+  .freq-cents-row {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-top: 4px;
+    font-size: 0.72rem;
+    color: #5a4a30;
   }
 
-  .cents-display {
-    font-size: 1.1rem;
-    font-family: 'Share Tech Mono', monospace;
-    height: 1.5rem;
-    color: var(--muted);
-    margin-top: 2px;
-    transition: color 0.2s;
-  }
-  .cents-display.in-tune { color: var(--in-tune); }
-  .cents-display.off { color: var(--warn); }
+  .cents-val { transition: color 0.2s; }
+  .cents-val.in-tune { color: #1a6010; }
+  .cents-val.off     { color: #a04010; }
 
-  /* --- STRINGS --- */
-  .strings-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); align-self: flex-start; margin-bottom: -0.75rem; }
+  /* ── STRING BUTTONS ── */
+  .section-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    align-self: flex-start;
+    margin-bottom: -0.6rem;
+  }
 
   .strings-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 8px;
+    gap: 7px;
     width: 100%;
   }
 
   .string-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.6rem 0.3rem;
+    background: radial-gradient(ellipse at 50% 30%, #2e4a2e, #0e1e0e);
+    border: 1px solid rgba(80,160,60,0.3);
+    border-radius: 8px;
+    padding: 0.55rem 0.2rem;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    transition: all 0.15s;
+    gap: 2px;
+    transition: all 0.12s;
     -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(120,200,80,0.1);
   }
 
-  .string-btn:hover { border-color: var(--accent2); background: #1e2230; }
-  .string-btn.active { border-color: var(--accent); background: rgba(0,229,160,0.08); }
+  .string-btn:active { transform: scale(0.94); }
+  .string-btn.active {
+    border-color: var(--accent);
+    background: radial-gradient(ellipse at 50% 30%, #3a6020, #162010);
+    box-shadow: 0 0 8px rgba(126,207,90,0.3), inset 0 1px 0 rgba(126,207,90,0.2);
+  }
 
   .string-name {
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--chrome);
   }
 
   .string-freq {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     font-family: 'Share Tech Mono', monospace;
     color: var(--muted);
   }
 
-  /* --- CONTROLS --- */
-  .controls { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-
-  .btn-row { display: flex; gap: 10px; width: 100%; }
-
-  .btn {
-    flex: 1;
-    padding: 0.8rem 1rem;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg3);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .btn:hover { border-color: rgba(255,255,255,0.15); background: #1e2230; }
-  .btn.primary { border-color: var(--accent); color: var(--accent); }
-  .btn.primary:hover { background: rgba(0,229,160,0.1); }
-  .btn.primary.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  .btn.danger { border-color: var(--warn); color: var(--warn); }
-  .btn.danger:hover { background: rgba(255,107,53,0.1); }
-
-  /* --- SOUND MODE --- */
+  /* ── RED BUTTONS (sound mode) ── */
   .sound-mode {
     display: flex;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
+    gap: 10px;
     width: 100%;
+    justify-content: center;
   }
 
   .mode-btn {
     flex: 1;
-    padding: 0.65rem;
-    background: none;
+    padding: 0.6rem 0.4rem;
+    border-radius: 50% / 40%;
     border: none;
-    color: var(--muted);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
+    color: #ffcccc;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.12s;
+    position: relative;
+    /* Corps du bouton rouge */
+    background: radial-gradient(ellipse at 40% 30%, #e03030, #801010);
+    box-shadow:
+      0 4px 0 #500808,
+      0 5px 8px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,160,160,0.3);
+  }
+
+  .mode-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #500808, 0 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,160,160,0.2);
+  }
+
+  .mode-btn.active {
+    background: radial-gradient(ellipse at 40% 30%, #ff5050, #cc1010);
+    color: #fff;
+    box-shadow:
+      0 4px 0 #500808,
+      0 5px 12px rgba(200,0,0,0.4),
+      inset 0 1px 0 rgba(255,200,200,0.4);
+  }
+
+  /* Voyant LED sur bouton actif */
+  .mode-btn.active::after {
+    content: '';
+    display: block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #ffee80;
+    box-shadow: 0 0 6px #ffdd00;
+    margin: 3px auto 0;
+  }
+
+  /* ── MIC BUTTON ── */
+  .mic-btn-wrap { width: 100%; }
+
+  #mic-btn {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 8px;
+    border: 1px solid rgba(80,160,60,0.35);
+    background: radial-gradient(ellipse at 50% 30%, #2a4a2a, #0e1e0e);
+    color: var(--accent);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all 0.15s;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(120,200,80,0.1);
     -webkit-tap-highlight-color: transparent;
   }
 
-  .mode-btn.active { background: rgba(0,229,160,0.12); color: var(--accent); }
-
-  /* --- STATUS --- */
-  .status-bar {
-    font-size: 0.7rem;
-    font-family: 'Share Tech Mono', monospace;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-align: center;
+  #mic-btn:active { transform: scale(0.97); }
+  #mic-btn.on {
+    background: radial-gradient(ellipse at 50% 30%, #3a6020, #1a3010);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(126,207,90,0.25), 0 3px 8px rgba(0,0,0,0.4);
   }
 
-  .status-dot {
-    display: inline-block;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--muted);
-    margin-right: 6px;
-    vertical-align: middle;
-    transition: background 0.3s;
-  }
-
-  .status-dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 1.5s infinite; }
-  .status-dot.playing { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  /* --- DIVIDER --- */
-  .divider { width: 100%; height: 1px; background: var(--border); }
-
-  /* needle glow animation */
-  @keyframes glow-green { 0%,100%{filter:drop-shadow(0 0 4px #00e5a0)} 50%{filter:drop-shadow(0 0 12px #00e5a0)} }
-  .needle-in-tune { animation: glow-green 1s infinite; }
-
-  /* --- DBMETER --- */
+  /* ── DBMETER ── */
   .dbmeter-wrap {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    opacity: 0.35;
+    transition: opacity 0.3s;
   }
+
   .dbmeter-label {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--muted);
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-    width: 32px;
+    width: 18px;
     text-align: right;
   }
+
   .dbmeter-track {
     flex: 1;
-    height: 6px;
-    background: var(--bg3);
+    height: 5px;
+    background: rgba(0,0,0,0.4);
     border-radius: 3px;
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(80,160,60,0.2);
   }
+
   .dbmeter-bar {
     height: 100%;
     width: 0%;
     border-radius: 3px;
     background: var(--accent);
-    transition: width 0.05s linear, background 0.1s;
+    transition: width 0.05s linear;
   }
-  .dbmeter-bar.warn  { background: #f0c040; }
-  .dbmeter-bar.clip  { background: var(--sharp); }
+
+  .dbmeter-bar.warn { background: var(--warn); }
+  .dbmeter-bar.clip { background: var(--sharp); }
+
   .dbmeter-value {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--muted);
-    width: 42px;
-    text-align: left;
+    width: 40px;
   }
+
+  /* ── STATUS ── */
+  .status-bar {
+    font-size: 0.62rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.07em;
+    text-align: center;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--muted);
+    margin-right: 5px;
+    vertical-align: middle;
+    transition: background 0.3s;
+  }
+
+  .status-dot.active  { background: var(--accent); box-shadow: 0 0 5px var(--accent); animation: pulse 1.5s infinite; }
+  .status-dot.playing { background: var(--warn);   box-shadow: 0 0 5px var(--warn); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(80,160,60,0.25), transparent);
+  }
+
+  /* ── NEEDLE ── */
   #needle-group {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  will-change: transform;
-}
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    will-change: transform;
+    transition: transform 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  @keyframes glow-green {
+    0%,100% { filter: drop-shadow(0 0 2px #7ecf5a); }
+    50%      { filter: drop-shadow(0 0 7px #7ecf5a); }
+  }
+  .needle-in-tune { animation: glow-green 1s infinite; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo-dot"></div>
-  <h1>Tuner</h1>
-  <span id="header-status">STANDBY</span>
+  <div class="logo-badge">AG-6</div>
+  <h1>Guitar Tuner</h1>
+  <span class="header-model" id="header-status">STANDBY</span>
 </header>
 
 <div class="main">
 
-  <!-- METER -->
-  <div class="meter-wrap">
-    <svg class="meter-svg" viewBox="0 0 340 160" xmlns="http://www.w3.org/2000/svg">
-<defs>
-  <filter id="glow"
-          x="-50%"
-          y="-50%"
-          width="200%"
-          height="200%"
-          color-interpolation-filters="sRGB">
-    <feGaussianBlur stdDeviation="3" result="blur"/>
-    <feMerge>
-      <feMergeNode in="blur"/>
-      <feMergeNode in="SourceGraphic"/>
-    </feMerge>
-  </filter>
-</defs>
-      <!-- Arc background -->
-      <path d="M 30 150 A 140 140 0 0 1 310 150" fill="none" stroke="#1a1e28" stroke-width="12" stroke-linecap="round"/>
+  <!-- METER HOUSING -->
+  <div class="meter-housing">
+    <div class="meter-face">
+      <div class="meter-brand">Automatic Guitar Tuner</div>
 
-      <!-- Colored zones -->
-      <path id="arc-flat"  d="M 30 150 A 140 140 0 0 1 100 38" fill="none" stroke="#4a8fff" stroke-width="6" stroke-linecap="round" opacity="0.35"/>
-      <path id="arc-in"    d="M 145 17 A 140 140 0 0 1 195 17" fill="none" stroke="#00e5a0" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
-      <path id="arc-sharp" d="M 240 38 A 140 140 0 0 1 310 150" fill="none" stroke="#ff4a7e" stroke-width="6" stroke-linecap="round" opacity="0.35"/>
+      <svg class="meter-svg" viewBox="0 0 320 145" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <!-- Texture papier cadran -->
+          <filter id="paper">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise"/>
+            <feColorMatrix type="saturate" values="0" in="noise" result="gray"/>
+            <feBlend in="SourceGraphic" in2="gray" mode="multiply" result="blend"/>
+            <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+          </filter>
+        </defs>
 
-      <!-- Tick marks -->
-      <g stroke="#2a2f3e" stroke-width="1.5" stroke-linecap="round">
-        <line x1="30" y1="150" x2="38" y2="150" transform="rotate(-90 170 150)"/>
-        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(-72 170 150)"/>
-        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(-54 170 150)"/>
-        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(-36 170 150)"/>
-        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(-18 170 150)"/>
-        <line x1="30" y1="150" x2="38" y2="150"/>
-        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(18 170 150)"/>
-        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(36 170 150)"/>
-        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(54 170 150)"/>
-        <line x1="30" y1="150" x2="37" y2="150" transform="rotate(72 170 150)"/>
-        <line x1="30" y1="150" x2="38" y2="150" transform="rotate(90 170 150)"/>
-      </g>
+        <!-- Fond cadran ivoire -->
+        <rect x="0" y="0" width="320" height="145" rx="6" fill="#e8e0c0" filter="url(#paper)"/>
 
-      <!-- Labels -->
-      <text x="20" y="155" fill="#4a8fff" font-size="11" font-family="Share Tech Mono,monospace" text-anchor="middle">♭</text>
-      <text x="170" y="12" fill="#00e5a0" font-size="10" font-family="Share Tech Mono,monospace" text-anchor="middle">✓</text>
-      <text x="320" y="155" fill="#ff4a7e" font-size="11" font-family="Share Tech Mono,monospace" text-anchor="middle">♯</text>
+        <!-- Arcs colorés -->
+        <path d="M 25 138 A 128 128 0 0 1 295 138" fill="none" stroke="#d8d0b0" stroke-width="10" stroke-linecap="round"/>
+        <path d="M 25 138 A 128 128 0 0 1 91  35"  fill="none" stroke="#4080cc" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+        <path d="M 138 14 A 128 128 0 0 1 182 14"  fill="none" stroke="#208020" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+        <path d="M 229  35 A 128 128 0 0 1 295 138" fill="none" stroke="#cc3030" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
 
-      <!-- Needle -->
-<g id="needle-group">
-  <!-- Halo -->
-  <line x1="170"
-        y1="150"
-        x2="170"
-        y2="30"
-        stroke="#00e5a0"
-        stroke-width="8"
-        stroke-linecap="round"
-        opacity="0.18"/>
+        <!-- Graduations fines -->
+        <g stroke="#5a4a30" stroke-linecap="round">
+          <!-- Grands traits : -90 -72 -54 -36 -18 0 18 36 54 72 90 -->
+          <line x1="25" y1="138" x2="33" y2="138" stroke-width="1.5" transform="rotate(-90 160 138)"/>
+          <line x1="25" y1="138" x2="32" y2="138" stroke-width="1"   transform="rotate(-72 160 138)"/>
+          <line x1="25" y1="138" x2="32" y2="138" stroke-width="1"   transform="rotate(-54 160 138)"/>
+          <line x1="25" y1="138" x2="32" y2="138" stroke-width="1"   transform="rotate(-36 160 138)"/>
+          <line x1="25" y1="138" x2="32" y2="138" stroke-width="1"   transform="rotate(-18 160 138)"/>
+          <line x1="25" y1="138" x2="33" y2="138" stroke-width="1.5"/>
+          <line x1="25" y1="138" x2="32" y2="138" stroke-width="1"   transform="rotate(18 160 138)"/>
+          <line x1="25" y1="138" x2="32" y2="138" stroke-width="1"   transform="rotate(36 160 138)"/>
+          <line x1="25" y1="138" x2="32" y2="138" stroke-width="1"   transform="rotate(54 160 138)"/>
+          <line x1="25" y1="138" x2="32" y2="138" stroke-width="1"   transform="rotate(72 160 138)"/>
+          <line x1="25" y1="138" x2="33" y2="138" stroke-width="1.5" transform="rotate(90 160 138)"/>
+          <!-- Petits traits intermédiaires -->
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(-81 160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(-63 160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(-45 160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(-27 160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(-9  160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(9   160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(27  160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(45  160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(63  160 138)"/>
+          <line x1="25" y1="138" x2="30" y2="138" stroke-width="0.8" transform="rotate(81  160 138)"/>
+        </g>
 
-  <!-- Aiguille -->
-  <line id="needle"
-        x1="170"
-        y1="150"
-        x2="170"
-        y2="30"
-        stroke="#00e5a0"
-        stroke-width="2.5"
-        stroke-linecap="round"/>
+        <!-- Labels ♭ ✓ ♯ -->
+        <text x="16"  y="142" fill="#3060b0" font-size="12" font-family="serif" text-anchor="middle">♭</text>
+        <text x="160" y="11"  fill="#1a6010" font-size="9"  font-family="Oswald,sans-serif" font-weight="600" text-anchor="middle" letter-spacing="1">IN TUNE</text>
+        <text x="304" y="142" fill="#b02020" font-size="12" font-family="serif" text-anchor="middle">♯</text>
 
-  <circle cx="170"
-          cy="150"
-          r="5"
-          fill="#00e5a0"/>
+        <!-- Fréquences des cordes -->
+        <text x="28"  y="128" fill="#3a3020" font-size="6.5" font-family="Share Tech Mono,monospace" text-anchor="middle">82</text>
+        <text x="68"  y="90"  fill="#3a3020" font-size="6.5" font-family="Share Tech Mono,monospace" text-anchor="middle">110</text>
+        <text x="108" y="58"  fill="#3a3020" font-size="6.5" font-family="Share Tech Mono,monospace" text-anchor="middle">147</text>
+        <text x="212" y="58"  fill="#3a3020" font-size="6.5" font-family="Share Tech Mono,monospace" text-anchor="middle">196</text>
+        <text x="252" y="90"  fill="#3a3020" font-size="6.5" font-family="Share Tech Mono,monospace" text-anchor="middle">247</text>
+        <text x="292" y="128" fill="#3a3020" font-size="6.5" font-family="Share Tech Mono,monospace" text-anchor="middle">330</text>
 
-  <circle cx="170"
-          cy="150"
-          r="10"
-          fill="none"
-          stroke="#00e5a0"
-          stroke-width="1"
-          opacity="0.3"/>
-</g>
-    </svg>
-  </div>
+        <!-- Aiguille -->
+        <g id="needle-group">
+          <line x1="160" y1="138" x2="160" y2="22"
+                stroke="#1a1008" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="160" cy="138" r="5" fill="#2a1808"/>
+          <circle cx="160" cy="138" r="8" fill="none" stroke="#2a1808" stroke-width="1" opacity="0.4"/>
+        </g>
+      </svg>
 
-  <!-- NOTE DISPLAY -->
-  <div class="note-display">
-    <div class="note-big" id="note-display">—</div>
-    <div class="freq-display" id="freq-display">— Hz</div>
-    <div class="cents-display" id="cents-display">— cents</div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- GUITAR STRINGS -->
-  <div class="strings-label">Écouter une corde</div>
-  <div class="strings-grid" id="strings-grid">
-    <!-- filled by JS -->
-  </div>
-
-  <!-- SOUND MODE -->
-  <div class="sound-mode">
-    <button class="mode-btn active" id="mode-sine" onclick="setMode('sine')">Sinus</button>
-    <button class="mode-btn" id="mode-nylon" onclick="setMode('nylon')">Nylon</button>
-    <button class="mode-btn" id="mode-piano" onclick="setMode('piano')">Piano</button>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- MIC CONTROL -->
-  <div class="controls">
-    <div class="btn-row">
-      <button class="btn primary" id="mic-btn" onclick="toggleMic()">🎙 Activer le micro</button>
+      <!-- Note & cents sur la face -->
+      <div class="note-display">
+        <div class="note-big" id="note-display">—</div>
+        <div class="freq-cents-row">
+          <span id="freq-display">— Hz</span>
+          <span class="cents-val" id="cents-display">— ¢</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="dbmeter-wrap" id="dbmeter-wrap" style="opacity:0.3; transition: opacity 0.3s;">
+  <!-- STRINGS -->
+  <div class="section-label">Écouter une corde</div>
+  <div class="strings-grid" id="strings-grid"></div>
+
+  <!-- SOUND MODE : boutons rouges -->
+  <div class="sound-mode">
+    <button class="mode-btn active" id="mode-sine"  onclick="setMode('sine')">Sinus</button>
+    <button class="mode-btn"        id="mode-nylon" onclick="setMode('nylon')">Nylon</button>
+    <button class="mode-btn"        id="mode-piano" onclick="setMode('piano')">Piano</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- MIC -->
+  <div class="mic-btn-wrap">
+    <button id="mic-btn" onclick="toggleMic()">🎙 Activer le micro</button>
+  </div>
+
+  <!-- DBMETER -->
+  <div class="dbmeter-wrap" id="dbmeter-wrap">
     <span class="dbmeter-label">IN</span>
     <div class="dbmeter-track">
       <div class="dbmeter-bar" id="dbmeter-bar"></div>
@@ -424,66 +553,58 @@
 
 <script>
 const STRINGS = [
-  { name: 'E2', display: 'E', freq: 82.41, oct: '2' },
-  { name: 'A2', display: 'A', freq: 110.00, oct: '2' },
-  { name: 'D3', display: 'D', freq: 146.83, oct: '3' },
-  { name: 'G3', display: 'G', freq: 196.00, oct: '3' },
-  { name: 'B3', display: 'B', freq: 246.94, oct: '3' },
-  { name: 'E4', display: 'E', freq: 329.63, oct: '4' },
+  { name:'E2', display:'E', freq:82.41,  oct:'2' },
+  { name:'A2', display:'A', freq:110.00, oct:'2' },
+  { name:'D3', display:'D', freq:146.83, oct:'3' },
+  { name:'G3', display:'G', freq:196.00, oct:'3' },
+  { name:'B3', display:'B', freq:246.94, oct:'3' },
+  { name:'E4', display:'E', freq:329.63, oct:'4' },
 ];
-
 const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
-let audioCtx = null;
-let analyser = null;
-let micStream = null;
-let rafId = null;
-let micActive = false;
-let soundMode = 'sine';
-let playingNode = null;
-let activeStringIdx = null;
-let needleAngle = 0;
-let targetAngle = 0;
+let audioCtx=null, analyser=null, micStream=null, rafId=null;
+let micActive=false, soundMode='sine', playingNode=null, activeStringIdx=null;
 
 function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if (audioCtx.state==='suspended') audioCtx.resume();
   return audioCtx;
 }
 
+/* ── BUILD STRINGS ── */
 function buildStrings() {
   const grid = document.getElementById('strings-grid');
-  STRINGS.forEach((s, i) => {
+  STRINGS.forEach((s,i) => {
     const btn = document.createElement('button');
     btn.className = 'string-btn';
-    btn.id = 'str-' + i;
+    btn.id = 'str-'+i;
     btn.innerHTML = `<span class="string-name">${s.display}</span><span class="string-freq">${s.freq.toFixed(0)} Hz</span>`;
     btn.onclick = () => playString(i);
     grid.appendChild(btn);
   });
 }
 
+/* ── MODE ── */
 function setMode(mode) {
   soundMode = mode;
-  document.getElementById('mode-sine').classList.toggle('active', mode === 'sine');
-  document.getElementById('mode-nylon').classList.toggle('active', mode === 'nylon');
-  document.getElementById('mode-piano').classList.toggle('active', mode === 'piano');
-  if (activeStringIdx !== null && playingNode) {
+  ['sine','nylon','piano'].forEach(m =>
+    document.getElementById('mode-'+m).classList.toggle('active', m===mode));
+  if (activeStringIdx!==null && playingNode) {
     stopPlayback();
     playString(activeStringIdx);
   }
 }
 
+/* ── PLAYBACK ── */
 const FADE_OUT_MS = 160;
 
 function stopPlayback(callback) {
-  if (activeStringIdx !== null) {
-    document.getElementById('str-' + activeStringIdx)?.classList.remove('active');
+  if (activeStringIdx!==null) {
+    document.getElementById('str-'+activeStringIdx)?.classList.remove('active');
     activeStringIdx = null;
   }
   if (playingNode) {
-    const node = playingNode;
-    playingNode = null;
+    const node = playingNode; playingNode = null;
     try { node.stop(); } catch(e){}
     updateStatusDot();
     if (callback) setTimeout(callback, FADE_OUT_MS);
@@ -495,440 +616,328 @@ function stopPlayback(callback) {
 
 function playString(idx) {
   const ctx = getAudioCtx();
-
-  // Sinus : toggle si même corde déjà active
-  if (soundMode === 'sine' && activeStringIdx === idx && playingNode) {
-    stopPlayback();
-    return;
-  }
-
+  if (soundMode==='sine' && activeStringIdx===idx && playingNode) { stopPlayback(); return; }
   const launch = () => {
     activeStringIdx = idx;
-    document.getElementById('str-' + idx).classList.add('active');
+    document.getElementById('str-'+idx).classList.add('active');
     const freq = STRINGS[idx].freq;
-    if (soundMode === 'sine') playSine(ctx, freq);
-    else if (soundMode === 'piano') playPiano(ctx, freq);
-    else playNylon(ctx, freq);
+    if      (soundMode==='sine')  playSine(ctx, freq);
+    else if (soundMode==='piano') playPiano(ctx, freq);
+    else                          playNylon(ctx, freq);
     updateStatusDot();
   };
-
   if (playingNode) { stopPlayback(launch); return; }
-  stopPlayback();
-  launch();
+  stopPlayback(); launch();
 }
 
-function playSine(ctx, freq) {
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = 'sine';
-  osc.frequency.value = freq;
-  gain.gain.setValueAtTime(0, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 0.02);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start();
-  playingNode = { stop: () => { const t = ctx.currentTime; gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(0, t + 0.15); setTimeout(()=>{ try{osc.stop();}catch(e){} }, 180); } };
-}
-
-function playNylon(ctx, freq) {
-  const duration     = 7.0;
-  const fadeStart    = 3.5;
-  const fadeDuration = 3.5;
-
-  const sampleRate   = ctx.sampleRate;
-  const N            = Math.round(sampleRate / freq);
-  const totalSamples = Math.round(sampleRate * duration);
-  const rawBuf       = ctx.createBuffer(1, totalSamples, sampleRate);
-  const data         = rawBuf.getChannelData(0);
-
-  // Bruit coloré : 4 passes de lissage → attaque douce et ronde
-  const ring = new Float32Array(N);
-  for (let i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
-  for (let pass = 0; pass < 4; pass++)
-    for (let i = 1; i < N; i++) ring[i] = 0.5 * (ring[i] + ring[i - 1]);
-
-  // KS : blend 0.55 (lissage prononcé), decay doux
-  const decay = 0.9987;
-  const b     = 0.55;
-  const fadeStartSample = Math.round(sampleRate * fadeStart);
-
-  for (let i = 0; i < totalSamples; i++) {
-    const cur = i % N;
-    const nxt = (i + 1) % N;
-    // On lit PUIS on met à jour le ring (ordre correct)
-    const raw = ring[cur];
-    ring[cur] = decay * (b * ring[cur] + (1 - b) * ring[nxt]);
-    // Fondu appliqué sur la sortie uniquement
-    if (i < fadeStartSample) {
-      data[i] = raw;
-    } else {
-      const t = (i - fadeStartSample) / (fadeDuration * sampleRate);
-      data[i] = raw * Math.max(0, 1 - t);
-    }
+/* ── BASS ENHANCER ──
+   Pour les petites enceintes mobiles : ajoute 2e et 3e harmonique
+   sur les fréquences < 200 Hz (E2, A2, D3) afin que le cerveau
+   reconstitue la fondamentale manquante (technique "missing fundamental").
+*/
+function addBassEnhancer(ctx, sourceNode, freq, outputNode) {
+  if (freq >= 200) {
+    sourceNode.connect(outputNode);
+    return;
   }
+  // Quantité d'enhancement inversement proportionnelle à la fréquence
+  const amount = Math.max(0, Math.min(0.7, (200 - freq) / 200));
 
-  const src = ctx.createBufferSource();
-  src.buffer = rawBuf;
+  // Waveshaper doux → génère des harmoniques paires (2f, 4f…)
+  const shaper = ctx.createWaveShaper();
+  shaper.curve = makeHarmonicCurve(amount);
+  shaper.oversample = '2x';
 
-  // Filtre corps chaleureux
-  const body = ctx.createBiquadFilter();
-  body.type            = 'peaking';
-  body.frequency.value = 240;
-  body.gain.value      = 7;
-  body.Q.value         = 1.8;
+  // Gain de mélange
+  const dryGain = ctx.createGain(); dryGain.gain.value = 1;
+  const wetGain = ctx.createGain(); wetGain.gain.value = amount * 0.6;
 
-  // Coupe les aigus criards
-  const hicut = ctx.createBiquadFilter();
-  hicut.type            = 'highshelf';
-  hicut.frequency.value = 1800;
-  hicut.gain.value      = -6;
-
-  // Attaque douce via gain envelope
-  const gainNode = ctx.createGain();
-  gainNode.gain.setValueAtTime(0, ctx.currentTime);
-  gainNode.gain.linearRampToValueAtTime(0.72, ctx.currentTime + 0.008);
-
-  src.connect(body);
-  body.connect(hicut);
-  hicut.connect(gainNode);
-  gainNode.connect(ctx.destination);
-  src.start();
-
-  playingNode = {
-    stop: () => {
-      const t = ctx.currentTime;
-      gainNode.gain.setValueAtTime(gainNode.gain.value, t);
-      gainNode.gain.linearRampToValueAtTime(0, t + 0.2);
-      setTimeout(() => { try { src.stop(); } catch(e){} }, 250);
-    }
-  };
-
-  src.onended = () => {
-    if (activeStringIdx !== null) {
-      document.getElementById('str-' + activeStringIdx)?.classList.remove('active');
-      activeStringIdx = null;
-      playingNode = null;
-      updateStatusDot();
-    }
-  };
+  sourceNode.connect(dryGain);  dryGain.connect(outputNode);
+  sourceNode.connect(shaper);   shaper.connect(wetGain); wetGain.connect(outputNode);
 }
 
-function playPiano(ctx, freq) {
-  // Synthèse additive : fondamentale + harmoniques avec decays différenciés
-  // Chaque partiel a son propre decay → brillance initiale qui s'estompe (piano réel)
-  const now = ctx.currentTime;
-
-  // Harmoniques : [ratio, gain relatif, decay τ en secondes]
-  const partials = [
-    [1,    1.00,  6.0],   // fondamentale   : longue tenue
-    [2,    0.55,  3.5],   // octave          : decay moyen
-    [3,    0.28,  2.2],   // quinte+octave   : decay plus court
-    [4,    0.18,  1.6],   // 2e octave       : brillance initiale
-    [5,    0.10,  1.1],   // tierce majeure  : attaque brillante
-    [6,    0.07,  0.8],   // harmonique 6    : click d'attaque
-    [7,    0.04,  0.5],   // harmonique 7    : brillance instantanée
-  ];
-
-  // Légère inharmonicité (cordes réelles ne sont pas parfaitement harmoniques)
-  // β = facteur d'inharmonicité (plus élevé pour les graves)
-  const beta = 0.00015 * Math.pow(440 / freq, 1.5);
-
-  const masterGain = ctx.createGain();
-  masterGain.gain.setValueAtTime(0, now);
-  masterGain.gain.linearRampToValueAtTime(0.5, now + 0.002); // attaque piano : très brève
-
-  // Filtre corps piano (chaleur des cortes graves)
-  const body = ctx.createBiquadFilter();
-  body.type            = 'peaking';
-  body.frequency.value = Math.min(freq * 2, 800);
-  body.gain.value      = 4;
-  body.Q.value         = 1.2;
-
-  const oscs = [];
-  const gains = [];
-
-  partials.forEach(([ratio, relGain, tau]) => {
-    // Fréquence inharmonique
-    const f = freq * ratio * Math.sqrt(1 + beta * ratio * ratio);
-
-    const osc  = ctx.createOscillator();
-    const gNode= ctx.createGain();
-
-    osc.type          = 'sine';
-    osc.frequency.value = f;
-
-    // Enveloppe exponentielle individuelle par partiel
-    gNode.gain.setValueAtTime(relGain * 0.85, now + 0.002);
-    gNode.gain.setTargetAtTime(0, now + 0.002, tau);
-
-    osc.connect(gNode);
-    gNode.connect(masterGain);
-    osc.start(now);
-    osc.stop(now + tau * 5); // stop à 5τ (≈ inaudible)
-
-    oscs.push(osc);
-    gains.push(gNode);
-  });
-
-  masterGain.connect(body);
-  body.connect(ctx.destination);
-
-  const totalDur = partials[0][2] * 5; // durée = 5τ de la fondamentale
-
-  playingNode = {
-    stop: () => {
-      const t = ctx.currentTime;
-      masterGain.gain.setValueAtTime(masterGain.gain.value, t);
-      masterGain.gain.linearRampToValueAtTime(0, t + 0.08);
-      oscs.forEach(o => { try { o.stop(t + 0.1); } catch(e){} });
-    }
-  };
-
-  // Nettoyage auto après extinction naturelle
-  setTimeout(() => {
-    if (activeStringIdx !== null && soundMode === 'piano') {
-      document.getElementById('str-' + activeStringIdx)?.classList.remove('active');
-      activeStringIdx = null;
-      playingNode = null;
-      updateStatusDot();
-    }
-  }, totalDur * 1000);
-}
-
-// Courbe de saturation douce (non utilisée mais conservée pour extensions futures)
-function makeSoftClipCurve(amount) {
-  const n = 256;
+function makeHarmonicCurve(amount) {
+  const n = 512;
   const curve = new Float32Array(n);
   for (let i = 0; i < n; i++) {
-    const x = (i * 2) / n - 1;
-    curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+    const x = (i*2)/n - 1;
+    // Soft clip asymétrique → produit des harmoniques paires et impaires
+    curve[i] = x + amount * (Math.sin(Math.PI * x) * 0.3);
   }
   return curve;
 }
 
-async function toggleMic() {
-  if (micActive) {
-    stopMic();
-  } else {
-    await startMic();
-  }
+/* ── SINE ── */
+function playSine(ctx, freq) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.45, ctx.currentTime + 0.02);
+  // Bass enhance pour les graves
+  addBassEnhancer(ctx, osc, freq, gain);
+  // Note : osc déjà connecté dans addBassEnhancer
+  gain.connect(ctx.destination);
+  osc.start();
+  playingNode = { stop: () => {
+    const t = ctx.currentTime;
+    gain.gain.setValueAtTime(gain.gain.value, t);
+    gain.gain.linearRampToValueAtTime(0, t+0.15);
+    setTimeout(()=>{ try{osc.stop();}catch(e){} }, 180);
+  }};
 }
+
+/* ── NYLON ── */
+function playNylon(ctx, freq) {
+  const duration=7.0, fadeStart=3.5, fadeDuration=3.5;
+  const sr = ctx.sampleRate;
+  const N  = Math.round(sr/freq);
+  const totalSamples = Math.round(sr*duration);
+  const rawBuf = ctx.createBuffer(1, totalSamples, sr);
+  const data   = rawBuf.getChannelData(0);
+
+  const ring = new Float32Array(N);
+  for (let i=0;i<N;i++) ring[i]=Math.random()*2-1;
+  for (let p=0;p<4;p++) for (let i=1;i<N;i++) ring[i]=0.5*(ring[i]+ring[i-1]);
+
+  const decay=0.9987, b=0.55;
+  const fadeStartSample = Math.round(sr*fadeStart);
+  for (let i=0;i<totalSamples;i++) {
+    const cur=i%N, nxt=(i+1)%N;
+    const raw=ring[cur];
+    ring[cur]=decay*(b*ring[cur]+(1-b)*ring[nxt]);
+    data[i] = i<fadeStartSample ? raw : raw*Math.max(0,1-(i-fadeStartSample)/(fadeDuration*sr));
+  }
+
+  const src  = ctx.createBufferSource(); src.buffer=rawBuf;
+  const body = ctx.createBiquadFilter();
+  body.type='peaking'; body.frequency.value=240; body.gain.value=7; body.Q.value=1.8;
+  const hicut= ctx.createBiquadFilter();
+  hicut.type='highshelf'; hicut.frequency.value=1800; hicut.gain.value=-6;
+  const gainNode=ctx.createGain();
+  gainNode.gain.setValueAtTime(0,ctx.currentTime);
+  gainNode.gain.linearRampToValueAtTime(0.72,ctx.currentTime+0.008);
+
+  // Bass enhance avant le filtre corps
+  const preGain = ctx.createGain(); preGain.gain.value=1;
+  addBassEnhancer(ctx, src, freq, preGain);
+  preGain.connect(body); body.connect(hicut); hicut.connect(gainNode); gainNode.connect(ctx.destination);
+  src.start();
+
+  playingNode = { stop: ()=>{
+    const t=ctx.currentTime;
+    gainNode.gain.setValueAtTime(gainNode.gain.value,t);
+    gainNode.gain.linearRampToValueAtTime(0,t+0.2);
+    setTimeout(()=>{ try{src.stop();}catch(e){} },250);
+  }};
+  src.onended = ()=>{ if(activeStringIdx!==null){
+    document.getElementById('str-'+activeStringIdx)?.classList.remove('active');
+    activeStringIdx=null; playingNode=null; updateStatusDot();
+  }};
+}
+
+/* ── PIANO ── */
+function playPiano(ctx, freq) {
+  const now = ctx.currentTime;
+  const partials=[
+    [1,1.00,6.0],[2,0.55,3.5],[3,0.28,2.2],
+    [4,0.18,1.6],[5,0.10,1.1],[6,0.07,0.8],[7,0.04,0.5],
+  ];
+  const beta = 0.00015*Math.pow(440/freq,1.5);
+  const masterGain=ctx.createGain();
+  masterGain.gain.setValueAtTime(0,now);
+  masterGain.gain.linearRampToValueAtTime(0.5,now+0.002);
+  const body=ctx.createBiquadFilter();
+  body.type='peaking'; body.frequency.value=Math.min(freq*2,800); body.gain.value=4; body.Q.value=1.2;
+
+  const oscs=[];
+  partials.forEach(([ratio,relGain,tau])=>{
+    const f=freq*ratio*Math.sqrt(1+beta*ratio*ratio);
+    const osc=ctx.createOscillator(), gNode=ctx.createGain();
+    osc.type='sine'; osc.frequency.value=f;
+    gNode.gain.setValueAtTime(relGain*0.85,now+0.002);
+    gNode.gain.setTargetAtTime(0,now+0.002,tau);
+    osc.connect(gNode); gNode.connect(masterGain);
+    osc.start(now); osc.stop(now+tau*5);
+    oscs.push(osc);
+  });
+
+  // Bass enhance sur le masterGain avant le filtre
+  const preGain=ctx.createGain(); preGain.gain.value=1;
+  masterGain.connect(preGain);
+  // Pour piano on connecte directement (les harmoniques sont déjà présentes)
+  preGain.connect(body); body.connect(ctx.destination);
+
+  const totalDur=partials[0][2]*5;
+  playingNode={ stop:()=>{
+    const t=ctx.currentTime;
+    masterGain.gain.setValueAtTime(masterGain.gain.value,t);
+    masterGain.gain.linearRampToValueAtTime(0,t+0.08);
+    oscs.forEach(o=>{ try{o.stop(t+0.1);}catch(e){} });
+  }};
+  setTimeout(()=>{
+    if(activeStringIdx!==null&&soundMode==='piano'){
+      document.getElementById('str-'+activeStringIdx)?.classList.remove('active');
+      activeStringIdx=null; playingNode=null; updateStatusDot();
+    }
+  }, totalDur*1000);
+}
+
+/* ── MIC ── */
+async function toggleMic() { micActive ? stopMic() : await startMic(); }
 
 async function startMic() {
   try {
-    console.log('[mic] getUserMedia...');
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }
     });
-    console.log('[mic] stream ok, tracks:', stream.getAudioTracks().length);
-
     const ctx = getAudioCtx();
-    console.log('[mic] ctx.state avant resume:', ctx.state);
     await ctx.resume();
-    console.log('[mic] ctx.state apres resume:', ctx.state, '| sampleRate:', ctx.sampleRate);
-
     micStream = stream;
     const source = ctx.createMediaStreamSource(stream);
     analyser = ctx.createAnalyser();
     analyser.fftSize = 4096;
     analyser.smoothingTimeConstant = 0.5;
-
-    // Amplification du signal micro avant analyse
-    const micBoost = ctx.createGain();
-    micBoost.gain.value = 8;
-
-    // Nœud silencieux → active le graphe sur Firefox sans écouter le micro
-    const silent = ctx.createGain();
-    silent.gain.value = 0;
-
-    source.connect(micBoost);
-    micBoost.connect(analyser);
-    source.connect(silent);
-    silent.connect(ctx.destination);
-    console.log('[mic] graphe connecte');
-
-    micActive = true;
-    const btn = document.getElementById('mic-btn');
-    btn.textContent = '\u23f9 Couper le micro';
-    btn.classList.add('on');
-    document.getElementById('header-status').textContent = 'LISTENING';
-    updateStatusDot();
-    detect();
+    const micBoost=ctx.createGain(); micBoost.gain.value=8;
+    const silent=ctx.createGain();   silent.gain.value=0;
+    source.connect(micBoost); micBoost.connect(analyser);
+    source.connect(silent);   silent.connect(ctx.destination);
+    micActive=true;
+    const btn=document.getElementById('mic-btn');
+    btn.textContent='⏹ Couper le micro'; btn.classList.add('on');
+    document.getElementById('header-status').textContent='LISTENING';
+    document.getElementById('dbmeter-wrap').style.opacity='1';
+    updateStatusDot(); detect();
   } catch(e) {
-    console.error('[mic] ERREUR:', e.name, e.message);
-    setStatus('Acces micro refuse — ' + e.message, false);
+    setStatus('Accès micro refusé — '+e.message, false);
   }
 }
 
 function stopMic() {
-  if (rafId) cancelAnimationFrame(rafId);
-  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
-  analyser = null;
-  micActive = false;
-  const btn = document.getElementById('mic-btn');
-  btn.textContent = '🎙 Activer le micro';
-  btn.classList.remove('on');
-  document.getElementById('header-status').textContent = 'STANDBY';
-  document.getElementById('note-display').textContent = '—';
-  document.getElementById('freq-display').textContent = '— Hz';
-  document.getElementById('cents-display').textContent = '— cents';
-  document.getElementById('note-display').className = 'note-big';
-  document.getElementById('cents-display').className = 'cents-display';
+  if(rafId) cancelAnimationFrame(rafId);
+  if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+  analyser=null; micActive=false;
+  const btn=document.getElementById('mic-btn');
+  btn.textContent='🎙 Activer le micro'; btn.classList.remove('on');
+  document.getElementById('header-status').textContent='STANDBY';
+  document.getElementById('note-display').textContent='—';
+  document.getElementById('freq-display').textContent='— Hz';
+  document.getElementById('cents-display').textContent='— ¢';
+  document.getElementById('note-display').className='note-big';
+  document.getElementById('cents-display').className='cents-val';
   setNeedle(0);
-  setStatus("Micro désactivé", false);
-  const dbw = document.getElementById('dbmeter-wrap');
-  if (dbw) dbw.style.opacity = '0.3';
-  const dbb = document.getElementById('dbmeter-bar');
-  if (dbb) { dbb.style.width = '0%'; dbb.className = 'dbmeter-bar'; }
-  const dbv = document.getElementById('dbmeter-value');
-  if (dbv) dbv.textContent = '— dB';
+  setStatus('Micro désactivé', false);
+  const w=document.getElementById('dbmeter-wrap'); if(w) w.style.opacity='0.35';
+  const b=document.getElementById('dbmeter-bar');  if(b){ b.style.width='0%'; b.className='dbmeter-bar'; }
+  const v=document.getElementById('dbmeter-value'); if(v) v.textContent='— dB';
 }
 
+/* ── DETECT ── */
 function detect() {
-  if (!analyser) return;
-  const buf = new Float32Array(analyser.fftSize);
+  if(!analyser) return;
+  const buf=new Float32Array(analyser.fftSize);
   analyser.getFloatTimeDomainData(buf);
-
-  // Calcul RMS + mise à jour dBmètre
-  let rms = 0;
-  for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
-  rms = Math.sqrt(rms / buf.length);
+  let rms=0;
+  for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
+  rms=Math.sqrt(rms/buf.length);
   updateDbMeter(rms);
-
-  const freq = autocorrelate(buf, audioCtx.sampleRate);
-  if (freq > 0) {
-    const { note, octave, cents } = freqToNote(freq);
-    updateDisplay(note, octave, freq, cents);
-  }
-  rafId = requestAnimationFrame(detect);
+  const freq=autocorrelate(buf,audioCtx.sampleRate);
+  if(freq>0){ const {note,octave,cents}=freqToNote(freq); updateDisplay(note,octave,freq,cents); }
+  rafId=requestAnimationFrame(detect);
 }
 
 function updateDbMeter(rms) {
-  const bar   = document.getElementById('dbmeter-bar');
-  const value = document.getElementById('dbmeter-value');
-  const wrap  = document.getElementById('dbmeter-wrap');
-  if (!bar || !value) return;
-
-  if (rms < 0.00001) {
-    bar.style.width = '0%';
-    value.textContent = '— dB';
-    bar.className = 'dbmeter-bar';
-    return;
-  }
-
-  const db = 20 * Math.log10(rms);
-  // Mapping : -80 dB → 0%, 0 dB → 100% (plage élargie pour signaux faibles)
-  const pct = Math.max(0, Math.min(100, (db + 80) / 80 * 100));
-  bar.style.width = pct + '%';
-  value.textContent = db.toFixed(1) + ' dB';
-
-  bar.className = 'dbmeter-bar' + (db > -3 ? ' clip' : db > -12 ? ' warn' : '');
-  wrap.style.opacity = '1';
+  const bar=document.getElementById('dbmeter-bar');
+  const val=document.getElementById('dbmeter-value');
+  if(!bar||!val) return;
+  if(rms<0.00001){ bar.style.width='0%'; val.textContent='— dB'; bar.className='dbmeter-bar'; return; }
+  const db=20*Math.log10(rms);
+  const pct=Math.max(0,Math.min(100,(db+80)/80*100));
+  bar.style.width=pct+'%';
+  val.textContent=db.toFixed(1)+' dB';
+  bar.className='dbmeter-bar'+(db>-3?' clip':db>-12?' warn':'');
 }
 
+/* ── AUTOCORRELATION ── */
 function autocorrelate(buf, sampleRate) {
-  let rms = 0;
-  for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
-  rms = Math.sqrt(rms / buf.length);
-  if (rms < 0.001) return -1;
-
-  let r1 = 0, r2 = buf.length - 1;
-  const threshold = 0.2;
-  for (let i = 0; i < buf.length / 2; i++) { if (Math.abs(buf[i]) < threshold) { r1 = i; break; } }
-  for (let i = 1; i < buf.length / 2; i++) { if (Math.abs(buf[buf.length - i]) < threshold) { r2 = buf.length - i; break; } }
-
-  const trimmed = buf.slice(r1, r2);
-  const n = trimmed.length;
-  const c = new Float32Array(n);
-  for (let i = 0; i < n; i++) for (let j = 0; j < n - i; j++) c[i] += trimmed[j] * trimmed[j + i];
-
-  let d = 1;
-  while (c[d] > c[d - 1]) d++;
-  let maxval = -1, maxpos = -1;
-  for (let i = d; i < n; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
-
-  let T0 = maxpos;
-  const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
-  const a = (x1 + x3 - 2 * x2) / 2, b = (x3 - x1) / 2;
-  if (a) T0 = T0 - b / (2 * a);
-
-  return sampleRate / T0;
+  let rms=0;
+  for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
+  rms=Math.sqrt(rms/buf.length);
+  if(rms<0.001) return -1;
+  let r1=0, r2=buf.length-1;
+  const thr=0.2;
+  for(let i=0;i<buf.length/2;i++){ if(Math.abs(buf[i])<thr){ r1=i; break; } }
+  for(let i=1;i<buf.length/2;i++){ if(Math.abs(buf[buf.length-i])<thr){ r2=buf.length-i; break; } }
+  const tr=buf.slice(r1,r2), n=tr.length;
+  const c=new Float32Array(n);
+  for(let i=0;i<n;i++) for(let j=0;j<n-i;j++) c[i]+=tr[j]*tr[j+i];
+  let d=1; while(c[d]>c[d-1]) d++;
+  let maxval=-1, maxpos=-1;
+  for(let i=d;i<n;i++){ if(c[i]>maxval){ maxval=c[i]; maxpos=i; } }
+  let T0=maxpos;
+  const x1=c[T0-1],x2=c[T0],x3=c[T0+1];
+  const a=(x1+x3-2*x2)/2, bv=(x3-x1)/2;
+  if(a) T0=T0-bv/(2*a);
+  return sampleRate/T0;
 }
 
 function freqToNote(freq) {
-  const A4 = 440;
-  const semitones = 12 * Math.log2(freq / A4);
-  const rounded = Math.round(semitones);
-  const noteIdx = ((rounded % 12) + 12 + 9) % 12;
-  const octave = Math.floor((rounded + 69) / 12);
-  const cents = Math.round((semitones - rounded) * 100);
-  return { note: NOTES[noteIdx], octave, cents };
+  const A4=440, semi=12*Math.log2(freq/A4), rounded=Math.round(semi);
+  const noteIdx=((rounded%12)+12+9)%12;
+  const octave=Math.floor((rounded+69)/12);
+  const cents=Math.round((semi-rounded)*100);
+  return {note:NOTES[noteIdx],octave,cents};
 }
 
-function updateDisplay(note, octave, freq, cents) {
-  const noteEl = document.getElementById('note-display');
-  const freqEl = document.getElementById('freq-display');
-  const centsEl = document.getElementById('cents-display');
-
-  noteEl.innerHTML = note + `<span class="note-octave">${octave}</span>`;
-  freqEl.textContent = freq.toFixed(1) + ' Hz';
-
-  const absCents = Math.abs(cents);
-  centsEl.textContent = (cents > 0 ? '+' : '') + cents + ' cents';
-
-  if (absCents <= 5) {
-    noteEl.className = 'note-big in-tune';
-    centsEl.className = 'cents-display in-tune';
-  } else if (cents < 0) {
-    noteEl.className = 'note-big flat';
-    centsEl.className = 'cents-display off';
+/* ── DISPLAY ── */
+function updateDisplay(note,octave,freq,cents) {
+  const noteEl=document.getElementById('note-display');
+  const freqEl=document.getElementById('freq-display');
+  const centsEl=document.getElementById('cents-display');
+  noteEl.innerHTML=note+`<span class="note-octave">${octave}</span>`;
+  freqEl.textContent=freq.toFixed(1)+' Hz';
+  centsEl.textContent=(cents>0?'+':'')+cents+' ¢';
+  const abs=Math.abs(cents);
+  if(abs<=5){
+    noteEl.className='note-big in-tune';
+    centsEl.className='cents-val in-tune';
+  } else if(cents<0){
+    noteEl.className='note-big flat';
+    centsEl.className='cents-val off';
   } else {
-    noteEl.className = 'note-big sharp';
-    centsEl.className = 'cents-display off';
+    noteEl.className='note-big sharp';
+    centsEl.className='cents-val off';
   }
-
-  const angle = cents * 0.9;
-  setNeedle(angle);
+  setNeedle(cents*0.9);
 }
 
 function setNeedle(angle) {
-  angle = Math.max(-90, Math.min(90, angle));
-
-  const group = document.getElementById('needle-group');
-
-  group.style.transformBox = 'fill-box';
-  group.style.transformOrigin = '50% 100%';
-  group.style.transform = `rotate(${angle}deg)`;
-
-  const needle = document.getElementById('needle');
-
-  if (Math.abs(angle) < 5) {
-    needle.setAttribute('stroke', '#00e5a0');
-    group.classList.add('needle-in-tune');
-  } else {
-    needle.setAttribute('stroke', '#00e5a0');
-    group.classList.remove('needle-in-tune');
-  }
+  angle=Math.max(-90,Math.min(90,angle));
+  const g=document.getElementById('needle-group');
+  g.style.transform=`rotate(${angle}deg)`;
+  if(Math.abs(angle)<5) g.classList.add('needle-in-tune');
+  else g.classList.remove('needle-in-tune');
 }
 
 function updateStatusDot() {
-  const dot = document.getElementById('status-dot');
-  const txt = document.getElementById('status-text');
-  if (playingNode || activeStringIdx !== null) {
-    dot.className = 'status-dot playing';
-    txt.textContent = 'Lecture : ' + (activeStringIdx !== null ? STRINGS[activeStringIdx].name : '');
-  } else if (micActive) {
-    dot.className = 'status-dot active';
-    txt.textContent = 'Micro actif — jouez une note';
+  const dot=document.getElementById('status-dot');
+  const txt=document.getElementById('status-text');
+  if(playingNode||activeStringIdx!==null){
+    dot.className='status-dot playing';
+    txt.textContent='Lecture : '+(activeStringIdx!==null?STRINGS[activeStringIdx].name:'');
+  } else if(micActive){
+    dot.className='status-dot active';
+    txt.textContent='Micro actif — jouez une note';
   } else {
-    dot.className = 'status-dot';
-    txt.textContent = 'Appuyez sur "Activer le micro" pour commencer';
+    dot.className='status-dot';
+    txt.textContent='Appuyez sur "Activer le micro" pour commencer';
   }
 }
 
-function setStatus(msg, active) {
-  document.getElementById('status-text').textContent = msg;
-  document.getElementById('status-dot').className = 'status-dot' + (active ? ' active' : '');
+function setStatus(msg,active) {
+  document.getElementById('status-text').textContent=msg;
+  document.getElementById('status-dot').className='status-dot'+(active?' active':'');
 }
 
 buildStrings();
