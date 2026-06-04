@@ -853,8 +853,9 @@ async function startMic() {
 }
 
 function stopMic() {
-  if(rafId) cancelAnimationFrame(rafId);
-  if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+if(detectRafId) cancelAnimationFrame(detectRafId);
+if(rafId) cancelAnimationFrame(rafId);
+if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
   analyser=null; micActive=false;
   const btn=document.getElementById('mic-btn');
   btn.textContent='🎙 Activer le micro'; btn.classList.remove('on');
@@ -880,29 +881,22 @@ function detect() {
   for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
   rms=Math.sqrt(rms/buf.length);
   updateDbMeter(rms);
-  const freq=autocorrelate(buf,audioCtx.sampleRate);
-if(freq>0){
-
-  if(stableFreq===null){
-    stableFreq=freq;
+  const freq=detectPitch(buf,audioCtx.sampleRate);
+  if(freq>0){
+    noSignalFrames=0;
+    if(smoothFreq===null){ smoothFreq=freq; }
+    else {
+      const ratio=freq/smoothFreq;
+      const alpha=(ratio>1.05||ratio<0.95)?0.6:0.12;
+      smoothFreq=smoothFreq*(1-alpha)+freq*alpha;
+    }
+    const {note,octave,cents}=freqToNote(smoothFreq);
+    updateDisplay(note,octave,smoothFreq,cents);
+  } else {
+    noSignalFrames++;
+    if(noSignalFrames>25){ smoothFreq=null; targetNeedleAngle=0; }
   }
-
-  stableFreq =
-    stableFreq * 0.85 +
-    freq * 0.15;
-
-  const {note,octave,cents} =
-    freqToNote(stableFreq);
-
-  updateDisplay(
-    note,
-    octave,
-    stableFreq,
-    cents
-  );
-}
-
-rafId=requestAnimationFrame(detect);
+  detectRafId=requestAnimationFrame(detect);
 }
 
 function updateDbMeter(rms) {
@@ -917,27 +911,54 @@ function updateDbMeter(rms) {
   bar.className='dbmeter-bar'+(db>-3?' clip':db>-12?' warn':'');
 }
 
-/* ── AUTOCORRELATION ── */
-function autocorrelate(buf, sampleRate) {
+/* ── PITCH DETECTION (YIN) ── */
+function detectPitch(buf, sampleRate) {
   let rms=0;
   for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
-  rms=Math.sqrt(rms/buf.length);
-  if(rms<0.001) return -1;
-  let r1=0, r2=buf.length-1;
-  const thr=0.2;
-  for(let i=0;i<buf.length/2;i++){ if(Math.abs(buf[i])<thr){ r1=i; break; } }
-  for(let i=1;i<buf.length/2;i++){ if(Math.abs(buf[buf.length-i])<thr){ r2=buf.length-i; break; } }
-  const tr=buf.slice(r1,r2), n=tr.length;
-  const c=new Float32Array(n);
-  for(let i=0;i<n;i++) for(let j=0;j<n-i;j++) c[i]+=tr[j]*tr[j+i];
-  let d=1; while(c[d]>c[d-1]) d++;
-  let maxval=-1, maxpos=-1;
-  for(let i=d;i<n;i++){ if(c[i]>maxval){ maxval=c[i]; maxpos=i; } }
-  let T0=maxpos;
-  const x1=c[T0-1],x2=c[T0],x3=c[T0+1];
-  const a=(x1+x3-2*x2)/2, bv=(x3-x1)/2;
-  if(a) T0=T0-bv/(2*a);
-  return sampleRate/T0;
+  if(Math.sqrt(rms/buf.length)<0.0008) return -1;
+
+  const minPeriod=Math.floor(sampleRate/420);
+  const maxPeriod=Math.ceil(sampleRate/70);
+  const W=Math.min(2048,Math.floor(buf.length/2));
+
+  const d=new Float32Array(maxPeriod+2);
+  for(let tau=1;tau<=maxPeriod;tau++){
+    let sum=0;
+    for(let j=0;j<W;j++){ const delta=buf[j]-buf[j+tau]; sum+=delta*delta; }
+    d[tau]=sum;
+  }
+
+  const nd=new Float32Array(maxPeriod+2);
+  nd[0]=1;
+  let runSum=0;
+  for(let tau=1;tau<=maxPeriod;tau++){
+    runSum+=d[tau];
+    nd[tau]=runSum>0?(d[tau]*tau)/runSum:0;
+  }
+
+  let bestTau=-1;
+  for(let tau=minPeriod;tau<=maxPeriod;tau++){
+    if(nd[tau]<0.15){
+      while(tau+1<=maxPeriod&&nd[tau+1]<nd[tau]) tau++;
+      bestTau=tau; break;
+    }
+  }
+  if(bestTau===-1){
+    let minVal=Infinity;
+    for(let tau=minPeriod;tau<=maxPeriod;tau++){
+      if(nd[tau]<minVal){ minVal=nd[tau]; bestTau=tau; }
+    }
+    if(minVal>0.35) return -1;
+  }
+
+  if(bestTau>0&&bestTau<maxPeriod){
+    const s0=nd[bestTau-1],s1=nd[bestTau],s2=nd[bestTau+1];
+    const denom=2*(2*s1-s0-s2);
+    if(denom!==0) bestTau+=(s0-s2)/denom;
+  }
+
+  const freq=sampleRate/bestTau;
+  return (freq>=70&&freq<=450)?freq:-1;
 }
 
 function freqToNote(freq) {
